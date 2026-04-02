@@ -52,6 +52,35 @@ module "athena" {
   tags           = local.tags
 }
 
+module "glue_role" {
+  source = "./modules/iam-glue-role"
+
+  role_name  = local.glue_role_name
+  bucket_arn = module.datalake_bucket.bucket_arn
+  tags       = local.tags
+}
+
+module "glue_curated_loader" {
+  source = "./modules/glue-shell"
+
+  job_name              = local.glue_job_name
+  trigger_name          = local.glue_trigger_name
+  role_arn              = module.glue_role.role_arn
+  bucket_name           = module.datalake_bucket.bucket_name
+  database_name         = local.database_name
+  raw_table_name        = local.raw_table_name
+  curated_table_name    = local.curated_table_name
+  athena_workgroup_name = module.athena.workgroup_name
+  athena_results_prefix = local.athena_results_prefix
+  raw_prefix            = local.raw_prefix
+  curated_prefix        = local.curated_prefix
+  script_path           = "${path.root}/glue_src/curated_loader.py"
+  script_s3_key         = local.glue_script_s3_key
+  enable_schedule       = var.enable_curated_schedule
+  schedule_expression   = var.curated_schedule_expression
+  tags                  = local.tags
+}
+
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_name          = "${local.name_prefix}-lambda-errors"
   alarm_description   = "Alarm when Lambda ingestion reports errors."
@@ -110,6 +139,28 @@ resource "aws_cloudwatch_metric_alarm" "dlq_visible_messages" {
 
   dimensions = {
     QueueName = module.sqs_queue.dlq_name
+  }
+
+  alarm_actions = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
+  ok_actions    = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
+
+  tags = local.tags
+}
+
+resource "aws_cloudwatch_metric_alarm" "glue_failed_tasks" {
+  alarm_name          = "${local.name_prefix}-glue-failed-tasks"
+  alarm_description   = "Alarm when the curated Glue job reports failed tasks."
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "glue.driver.aggregate.numFailedTasks"
+  namespace           = "Glue"
+  period              = 300
+  statistic           = "Maximum"
+  threshold           = 1
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    JobName = module.glue_curated_loader.job_name
   }
 
   alarm_actions = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]

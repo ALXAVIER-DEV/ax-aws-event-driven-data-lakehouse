@@ -36,13 +36,12 @@ Ja implementado:
 - Partial batch failure para reprocessamento seletivo no consumo SQS -> Lambda
 - IAM role da Lambda
 - Athena Workgroup
+- Glue Python Shell para automatizar a carga da camada curated
 - Alarmes basicos de Lambda, fila principal e DLQ
 - Composicao da stack principal no root module
 
 Ainda pendente:
 
-- Orquestracao da camada curated
-- Glue job ou equivalente para materializacao em parquet
 - Estrategia final de deploy multi-account
 - Dashboards e observabilidade mais completa
 
@@ -67,4 +66,3 @@ Os SQLs para camada raw e curated estao em:
 - `modules/athena/dml/`
 
 Eles ainda usam placeholders e hoje servem como referencia para a proxima etapa da plataforma.
-"# ax-aws-event-driven-data-lakehouse" 

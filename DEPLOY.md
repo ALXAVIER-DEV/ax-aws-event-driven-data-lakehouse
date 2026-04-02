@@ -83,12 +83,13 @@ A stack raiz atual cria:
 - IAM role da Lambda
 - Lambda de ingestao
 - Athena workgroup
+- Glue job para carga automatizada da camada curated
 - Alarmes CloudWatch basicos
 
 ## Observacoes
 
 - O projeto ja possui aliases de provider para `dev`, `hom` e `prod`, mas a composicao atual ainda nao instancia modulos separados por conta.
-- A camada curated ainda nao e aplicada automaticamente.
+- A camada curated agora pode ser carregada automaticamente pelo Glue job agendado.
 - Antes de aplicar em producao, ainda vale adicionar testes de deploy, dashboards e tratamento mais completo de observabilidade.
 
 ## 7. Teste de Ponta a Ponta
@@ -177,4 +178,28 @@ SELECT
 FROM onboarding.raw_messages_json
 ORDER BY ingestion_ts DESC
 LIMIT 20;
+```
+
+## 9. Camada Curated Automatizada
+
+O projeto agora cria um Glue Python Shell agendado para automatizar a carga da camada curated.
+
+Comportamento atual:
+
+- cria o database e as tabelas do Athena, se ainda nao existirem
+- executa `MSCK REPAIR TABLE` na camada raw
+- recria a particao correspondente na camada curated
+- grava os dados em parquet no prefixo `curated/messages/`
+
+Outputs uteis:
+
+```bash
+terraform output -raw glue_curated_job_name
+terraform output -raw glue_curated_trigger_name
+```
+
+Para executar manualmente um teste do job:
+
+```bash
+aws glue start-job-run --job-name NOME_DO_JOB --region sa-east-1
 ```

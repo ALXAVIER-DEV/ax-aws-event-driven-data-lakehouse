@@ -21,3 +21,11 @@ output "lambda_function_name" {
 output "athena_workgroup_name" {
   value = module.athena.workgroup_name
 }
+
+output "glue_curated_job_name" {
+  value = module.glue_curated_loader.job_name
+}
+
+output "glue_curated_trigger_name" {
+  value = module.glue_curated_loader.trigger_name
+}

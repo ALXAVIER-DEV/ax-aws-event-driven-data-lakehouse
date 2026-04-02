@@ -49,3 +49,13 @@ variable "alarm_topic_arn" {
   type    = string
   default = null
 }
+
+variable "enable_curated_schedule" {
+  type    = bool
+  default = true
+}
+
+variable "curated_schedule_expression" {
+  type    = string
+  default = "cron(0/15 * * * ? *)"
+}
