@@ -203,3 +203,30 @@ Para executar manualmente um teste do job:
 ```bash
 aws glue start-job-run --job-name NOME_DO_JOB --region sa-east-1
 ```
+
+## 10. GitHub Actions
+
+O repositorio inclui dois workflows:
+
+- `.github/workflows/terraform-ci.yml`
+- `.github/workflows/terraform-plan.yml`
+
+Configuracao recomendada no GitHub:
+
+1. Criar environments chamados `dev`, `hom` e `prod`.
+2. Em cada environment, definir o secret `AWS_ROLE_ARN`.
+3. Definir repository variables:
+
+- `AWS_REGION`
+- `PROJECT_NAME`
+- `CROSS_ACCOUNT_ROLE_NAME`
+- `DEV_ACCOUNT_ID`
+- `HOM_ACCOUNT_ID`
+- `PROD_ACCOUNT_ID`
+
+Variaveis opcionais:
+
+- `ALARM_TOPIC_ARN`
+- `CURATED_SCHEDULE_EXPRESSION`
+- `TAG_OWNER`
+- `TAG_COST_CENTER`

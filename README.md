@@ -58,6 +58,21 @@ Ainda pendente:
 3. Ajuste o backend do ambiente desejado em `environmests/<ambiente>/backend.hcl`.
 4. Siga o passo a passo em [DEPLOY.md](/e:/Projetos/ax-aws-event-driven-data-lakehouse/DEPLOY.md).
 
+## CI/CD
+
+Workflows incluidos:
+
+- `Terraform CI`: roda `terraform fmt -check`, `terraform init -backend=false` e `terraform validate`
+- `Terraform Plan`: execucao manual por ambiente via GitHub Actions
+
+Para o workflow de `plan`, configure no GitHub:
+
+- environments: `dev`, `hom`, `prod`
+- secret por environment: `AWS_ROLE_ARN`
+- repository vars: `AWS_REGION`, `PROJECT_NAME`, `CROSS_ACCOUNT_ROLE_NAME`
+- repository vars: `DEV_ACCOUNT_ID`, `HOM_ACCOUNT_ID`, `PROD_ACCOUNT_ID`
+- opcionais: `ALARM_TOPIC_ARN`, `CURATED_SCHEDULE_EXPRESSION`, `TAG_OWNER`, `TAG_COST_CENTER`
+
 ## SQLs de Referencia
 
 Os SQLs para camada raw e curated estao em:

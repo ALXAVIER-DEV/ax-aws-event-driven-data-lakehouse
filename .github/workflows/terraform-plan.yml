@@ -1,0 +1,65 @@
+name: Terraform Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to plan
+        required: true
+        type: choice
+        options:
+          - dev
+          - hom
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'sa-east-1' }}
+
+      - name: Create tfvars for selected environment
+        shell: bash
+        run: |
+          cat > ci.auto.tfvars <<EOF
+          aws_region              = "${{ vars.AWS_REGION || 'sa-east-1' }}"
+          project_name            = "${{ vars.PROJECT_NAME || 'ax-onboarding' }}"
+          environment             = "${{ inputs.environment }}"
+          cross_account_role_name = "${{ vars.CROSS_ACCOUNT_ROLE_NAME || 'terraform-deployment-role' }}"
+          dev_account_id          = "${{ vars.DEV_ACCOUNT_ID }}"
+          hom_account_id          = "${{ vars.HOM_ACCOUNT_ID }}"
+          prod_account_id         = "${{ vars.PROD_ACCOUNT_ID }}"
+          alarm_topic_arn         = "${{ vars.ALARM_TOPIC_ARN }}"
+          enable_curated_schedule = true
+          curated_schedule_expression = "${{ vars.CURATED_SCHEDULE_EXPRESSION || 'cron(0/15 * * * ? *)' }}"
+          tags = {
+            Project    = "${{ vars.PROJECT_NAME || 'ax-onboarding' }}"
+            ManagedBy  = "Terraform"
+            Owner      = "${{ vars.TAG_OWNER || 'DataTeam' }}"
+            CostCenter = "${{ vars.TAG_COST_CENTER || 'Data' }}"
+          }
+          EOF
+
+      - name: Terraform Init
+        run: terraform init -backend-config=environmests/${{ inputs.environment }}/backend.hcl
+
+      - name: Terraform Plan
+        run: terraform plan -var-file=ci.auto.tfvars
