@@ -1,7 +1,9 @@
 .terraform/
+bootstrap/.terraform/
 terraform.tfstate*
 *.tfstate
 *.tfstate.backup
+bootstrap/.terraform.lock.hcl
 .idea/
 .venv/
 *.tfvars
