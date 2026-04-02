@@ -1,0 +1,9 @@
+.terraform/
+.terraform.tfstate*
+.idea/
+.venv/
+*.tfvars
+!*.tfvars.example
+lambda_src/app.zip
+__pycache__/
+*.pyc

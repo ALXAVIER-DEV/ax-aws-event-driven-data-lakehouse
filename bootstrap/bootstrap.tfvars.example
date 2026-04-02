@@ -1,0 +1,9 @@
+project_name          = "ax-onboarding"
+management_account_id = "123456789012"
+
+tags = {
+  Project    = "ax-onboarding"
+  ManagedBy  = "Terraform"
+  Owner      = "DataTeam"
+  CostCenter = "Data"
+}

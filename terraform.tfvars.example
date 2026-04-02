@@ -1,0 +1,16 @@
+aws_region              = "sa-east-1"
+project_name            = "ax-onboarding"
+environment             = "dev"
+cross_account_role_name = "terraform-deployment-role"
+alarm_topic_arn         = null
+
+dev_account_id  = "111111111111"
+hom_account_id  = "222222222222"
+prod_account_id = "333333333333"
+
+tags = {
+  Project    = "ax-onboarding"
+  ManagedBy  = "Terraform"
+  Owner      = "DataTeam"
+  CostCenter = "Data"
+}
