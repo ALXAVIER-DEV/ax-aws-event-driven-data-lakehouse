@@ -90,3 +90,91 @@ A stack raiz atual cria:
 - O projeto ja possui aliases de provider para `dev`, `hom` e `prod`, mas a composicao atual ainda nao instancia modulos separados por conta.
 - A camada curated ainda nao e aplicada automaticamente.
 - Antes de aplicar em producao, ainda vale adicionar testes de deploy, dashboards e tratamento mais completo de observabilidade.
+
+## 7. Teste de Ponta a Ponta
+
+Mensagem de teste sugerida para publicar no SNS:
+
+```json
+{
+  "id": "msg-001",
+  "mensagem": "Onbording aprendizagem serveless aws",
+  "autor": "Alex"
+}
+```
+
+Exemplo com AWS CLI:
+
+```bash
+aws sns publish \
+  --topic-arn SEU_TOPIC_ARN \
+  --message "{\"id\":\"msg-001\",\"mensagem\":\"Onbording aprendizagem serveless aws\",\"autor\":\"Alex\"}"
+```
+
+Verificacoes apos o publish:
+
+1. Confirmar que a mensagem entrou na fila SQS principal.
+2. Confirmar que a Lambda foi executada.
+3. Conferir logs da Lambda no CloudWatch.
+4. Validar se um arquivo foi gravado em `raw/messages/date=YYYYMMDD/`.
+5. Confirmar que a DLQ permaneceu vazia.
+
+Formato esperado no S3:
+
+```json
+{
+  "event_id": "uuid-gerado",
+  "ingestion_ts": "2026-04-02T00:00:00+00:00",
+  "payload": {
+    "id": "msg-001",
+    "mensagem": "Onbording aprendizagem serveless aws",
+    "autor": "Alex"
+  }
+}
+```
+
+## 8. Validacao no Athena
+
+Crie o database:
+
+```sql
+CREATE DATABASE IF NOT EXISTS onboarding;
+```
+
+Crie a tabela raw:
+
+```sql
+CREATE TABLE IF NOT EXISTS onboarding.raw_messages_json (
+  event_id string,
+  ingestion_ts string,
+  payload struct<
+    id:string,
+    mensagem:string,
+    autor:string
+  >
+)
+PARTITIONED BY (date string)
+ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+LOCATION 's3://SEU_BUCKET/raw/messages/';
+```
+
+Carregue as particoes:
+
+```sql
+MSCK REPAIR TABLE onboarding.raw_messages_json;
+```
+
+Consulte os dados:
+
+```sql
+SELECT
+  event_id,
+  ingestion_ts,
+  payload.id,
+  payload.mensagem,
+  payload.autor,
+  date
+FROM onboarding.raw_messages_json
+ORDER BY ingestion_ts DESC
+LIMIT 20;
+```
