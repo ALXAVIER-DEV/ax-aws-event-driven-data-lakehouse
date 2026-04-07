@@ -91,6 +91,7 @@ A stack raiz atual cria:
 - O projeto ja possui aliases de provider para `dev`, `hom` e `prod`, mas a composicao atual ainda nao instancia modulos separados por conta.
 - A camada curated agora pode ser carregada automaticamente pelo Glue job agendado.
 - Antes de aplicar em producao, ainda vale adicionar testes de deploy, dashboards e tratamento mais completo de observabilidade.
+- O script do Glue tambem suporta execucao local para testes unitarios sem depender do runtime `awsglue`.
 
 ## 7. Teste de Ponta a Ponta
 
@@ -230,3 +231,14 @@ Variaveis opcionais:
 - `CURATED_SCHEDULE_EXPRESSION`
 - `TAG_OWNER`
 - `TAG_COST_CENTER`
+
+## 11. Validacoes Locais
+
+Antes de abrir PR ou aplicar mudancas, rode:
+
+```bash
+terraform fmt -check -recursive
+terraform validate
+python -m compileall lambda_src glue_src tests
+python -m unittest discover -s tests -v
+```

@@ -56,7 +56,7 @@ Ainda pendente:
 1. Copie `terraform.tfvars.example` para um arquivo local de variaveis.
 2. Preencha os IDs reais das contas AWS.
 3. Ajuste o backend do ambiente desejado em `environmests/<ambiente>/backend.hcl`.
-4. Siga o passo a passo em [DEPLOY.md](/e:/Projetos/ax-aws-event-driven-data-lakehouse/DEPLOY.md).
+4. Siga o passo a passo em [DEPLOY.md](DEPLOY.md).
 
 ## CI/CD
 
@@ -64,6 +64,11 @@ Workflows incluidos:
 
 - `Terraform CI`: roda `terraform fmt -check`, `terraform init -backend=false` e `terraform validate`
 - `Terraform Plan`: execucao manual por ambiente via GitHub Actions
+
+Validacoes adicionais no CI:
+
+- compilacao dos codigos Python da Lambda e do Glue
+- testes unitarios locais em `tests/`
 
 Para o workflow de `plan`, configure no GitHub:
 
@@ -81,3 +86,14 @@ Os SQLs para camada raw e curated estao em:
 - `modules/athena/dml/`
 
 Eles ainda usam placeholders e hoje servem como referencia para a proxima etapa da plataforma.
+
+## Testes Locais
+
+Checagens disponiveis no estado atual do repositorio:
+
+```bash
+terraform fmt -check -recursive
+terraform validate
+python -m compileall lambda_src glue_src tests
+python -m unittest discover -s tests -v
+```
