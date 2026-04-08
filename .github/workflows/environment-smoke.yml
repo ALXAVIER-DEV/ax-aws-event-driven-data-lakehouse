@@ -1,10 +1,10 @@
-name: Terraform Plan
+name: Environment Smoke
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Environment to plan
+        description: Environment to validate
         required: true
         type: choice
         options:
@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  plan:
+  smoke:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
@@ -29,6 +29,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -61,8 +66,5 @@ jobs:
           }
           EOF
 
-      - name: Terraform Init
-        run: terraform init -backend-config=environments/${{ inputs.environment }}/backend.hcl
-
-      - name: Terraform Plan
-        run: terraform plan -var-file=ci.auto.tfvars
+      - name: Run Environment Smoke Test
+        run: python scripts/smoke_test.py --environment ${{ inputs.environment }} --mode plan --var-file ci.auto.tfvars

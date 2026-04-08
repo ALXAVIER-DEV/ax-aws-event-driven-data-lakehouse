@@ -25,6 +25,7 @@ resource "aws_glue_job" "this" {
     "--athena_results_prefix" = var.athena_results_prefix
     "--raw_prefix"            = var.raw_prefix
     "--curated_prefix"        = var.curated_prefix
+    "--enable-metrics"        = var.enable_metrics ? "true" : "false"
   }
 
   execution_property {

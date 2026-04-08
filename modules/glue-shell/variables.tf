@@ -60,6 +60,11 @@ variable "schedule_expression" {
   default = "cron(0/15 * * * ? *)"
 }
 
+variable "enable_metrics" {
+  type    = bool
+  default = true
+}
+
 variable "tags" {
   type = map(string)
 }

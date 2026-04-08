@@ -1,5 +1,10 @@
--- athena/ddl_raw_messages.sql
-CREATE TABLE IF NOT EXISTS onboarding.raw_messages_json (
+-- Template variables:
+--   ${database_name}
+--   ${raw_table_name}
+--   ${bucket_name}
+--   ${raw_prefix}
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ${database_name}.${raw_table_name} (
   event_id string,
   ingestion_ts string,
   payload struct<
@@ -10,4 +15,4 @@ CREATE TABLE IF NOT EXISTS onboarding.raw_messages_json (
 )
 PARTITIONED BY (date string)
 ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
-LOCATION 's3://BUCKET_NAME/raw/messages/';
+LOCATION 's3://${bucket_name}/${raw_prefix}/';

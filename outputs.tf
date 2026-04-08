@@ -18,6 +18,10 @@ output "lambda_function_name" {
   value = module.lambda_ingest.function_name
 }
 
+output "lambda_log_group_name" {
+  value = module.lambda_ingest.log_group_name
+}
+
 output "athena_workgroup_name" {
   value = module.athena.workgroup_name
 }
@@ -28,4 +32,12 @@ output "glue_curated_job_name" {
 
 output "glue_curated_trigger_name" {
   value = module.glue_curated_loader.trigger_name
+}
+
+output "operations_dashboard_name" {
+  value = aws_cloudwatch_dashboard.operations.dashboard_name
+}
+
+output "target_account_id" {
+  value = local.target_account_id
 }

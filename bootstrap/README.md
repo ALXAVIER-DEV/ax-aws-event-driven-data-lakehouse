@@ -31,9 +31,9 @@ O nome do bucket segue este padrao:
 
 Depois de criar o bucket, atualize os arquivos em:
 
-- `environmests/dev/backend.hcl`
-- `environmests/hom/backend.hcl`
-- `environmests/prod/backend.hcl`
+- `environments/dev/backend.hcl`
+- `environments/hom/backend.hcl`
+- `environments/prod/backend.hcl`
 
 ## Observacoes
 

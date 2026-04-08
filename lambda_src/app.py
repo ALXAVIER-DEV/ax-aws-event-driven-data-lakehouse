@@ -9,8 +9,14 @@ s3 = boto3.client("s3")
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 PREFIX_BASE = os.environ.get("PREFIX_BASE", "raw/messages")
 
+
+def log_event(level, message, **fields):
+    entry = {"level": level, "message": message, **fields}
+    print(json.dumps(entry))
+
+
 def lambda_handler(event, context):
-    print(json.dumps(event))
+    log_event("INFO", "Received batch.", record_count=len(event.get("Records", [])))
     batch_item_failures = []
 
     for record in event.get("Records", []):
@@ -41,8 +47,19 @@ def lambda_handler(event, context):
                 Body=json.dumps(output).encode("utf-8"),
                 ContentType="application/json"
             )
+            log_event(
+                "INFO",
+                "Stored ingested event in S3.",
+                message_id=record.get("messageId"),
+                s3_key=key,
+            )
         except Exception as exc:
-            print(f"Failed to process record: {exc}")
+            log_event(
+                "ERROR",
+                "Failed to process record.",
+                message_id=record.get("messageId"),
+                error=str(exc),
+            )
             batch_item_failures.append({"itemIdentifier": record["messageId"]})
 
     return {"batchItemFailures": batch_item_failures}

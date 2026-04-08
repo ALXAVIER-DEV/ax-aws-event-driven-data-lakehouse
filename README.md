@@ -19,11 +19,11 @@ Fluxo de dados:
 ## Estrutura do Repositorio
 
 - `main.tf`: compoe a stack principal
-- `providers.tf`: providers AWS e aliases por ambiente
+- `providers.tf`: provider AWS principal
 - `bootstrap/`: bucket de remote state
 - `modules/`: modulos Terraform reutilizaveis
 - `lambda_src/`: codigo Python da Lambda de ingestao
-- `environmests/`: backends por ambiente
+- `environments/`: backends por ambiente
 
 ## Status do Projeto
 
@@ -38,24 +38,24 @@ Ja implementado:
 - Athena Workgroup
 - Glue Python Shell para automatizar a carga da camada curated
 - Alarmes basicos de Lambda, fila principal e DLQ
+- Dashboard operacional CloudWatch com metricas e logs
 - Composicao da stack principal no root module
 
 Ainda pendente:
 
-- Estrategia final de deploy multi-account
 - Dashboards e observabilidade mais completa
 
 ## Requisitos
 
 - Terraform `>= 1.8.0`
-- Credenciais AWS com permissao para assumir os roles de deploy
+- Credenciais AWS validas para a conta do ambiente selecionado
 - Buckets de state configurados via `bootstrap/` ou previamente existentes
 
 ## Como Comecar
 
 1. Copie `terraform.tfvars.example` para um arquivo local de variaveis.
 2. Preencha os IDs reais das contas AWS.
-3. Ajuste o backend do ambiente desejado em `environmests/<ambiente>/backend.hcl`.
+3. Ajuste o backend do ambiente desejado em `environments/<ambiente>/backend.hcl`.
 4. Siga o passo a passo em [DEPLOY.md](DEPLOY.md).
 
 ## CI/CD
@@ -64,6 +64,7 @@ Workflows incluidos:
 
 - `Terraform CI`: roda `terraform fmt -check`, `terraform init -backend=false` e `terraform validate`
 - `Terraform Plan`: execucao manual por ambiente via GitHub Actions
+- `Environment Smoke`: executa smoke test por ambiente com `init` e `plan`
 
 Validacoes adicionais no CI:
 
@@ -74,18 +75,27 @@ Para o workflow de `plan`, configure no GitHub:
 
 - environments: `dev`, `hom`, `prod`
 - secret por environment: `AWS_ROLE_ARN`
-- repository vars: `AWS_REGION`, `PROJECT_NAME`, `CROSS_ACCOUNT_ROLE_NAME`
+- repository vars: `AWS_REGION`, `PROJECT_NAME`
 - repository vars: `DEV_ACCOUNT_ID`, `HOM_ACCOUNT_ID`, `PROD_ACCOUNT_ID`
 - opcionais: `ALARM_TOPIC_ARN`, `CURATED_SCHEDULE_EXPRESSION`, `TAG_OWNER`, `TAG_COST_CENTER`
 
+## Estrategia Multi-Account
+
+A estrategia agora combina duas garantias:
+
+- cada workflow de deploy/smoke usa credenciais do `environment` correspondente no GitHub
+- a stack valida em `main.tf` que o `account_id` ativo coincide com o `environment` selecionado
+
+Isso impede aplicar `dev.tfvars` na conta errada e formaliza o boundary multi-account sem exigir migracao de state.
+
 ## SQLs de Referencia
 
-Os SQLs para camada raw e curated estao em:
+Os SQLs versionados para camada raw e curated estao em:
 
 - `modules/athena/ddl/`
 - `modules/athena/dml/`
 
-Eles ainda usam placeholders e hoje servem como referencia para a proxima etapa da plataforma.
+Esses arquivos agora usam placeholders nomeados como `${database_name}`, `${bucket_name}` e `${partition_date}`, alinhados ao comportamento implementado no Glue loader.
 
 ## Testes Locais
 
@@ -96,4 +106,5 @@ terraform fmt -check -recursive
 terraform validate
 python -m compileall lambda_src glue_src tests
 python -m unittest discover -s tests -v
+python scripts/smoke_test.py --environment dev --mode static
 ```

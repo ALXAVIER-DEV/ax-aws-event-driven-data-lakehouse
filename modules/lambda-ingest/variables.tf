@@ -27,6 +27,26 @@ variable "queue_arn" {
   type = string
 }
 
+variable "log_retention_in_days" {
+  type    = number
+  default = 14
+}
+
+variable "log_format" {
+  type    = string
+  default = "JSON"
+}
+
+variable "application_log_level" {
+  type    = string
+  default = "INFO"
+}
+
+variable "system_log_level" {
+  type    = string
+  default = "INFO"
+}
+
 variable "tags" {
   type = map(string)
 }

@@ -1,8 +1,11 @@
 aws_region              = "sa-east-1"
 project_name            = "ax-onboarding"
 environment             = "hom"
-cross_account_role_name = "terraform-deployment-role"
 alarm_topic_arn         = null
+enable_glue_metrics     = true
+lambda_log_retention_in_days = 14
+lambda_duration_p95_threshold_ms = 45000
+queue_oldest_message_age_threshold_seconds = 300
 
 dev_account_id  = "111111111111"
 hom_account_id  = "222222222222"

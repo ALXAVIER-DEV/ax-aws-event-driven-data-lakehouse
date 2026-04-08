@@ -15,7 +15,7 @@ tags = {
 }
 ```
 
-Depois ajuste os arquivos em `environmests/dev/backend.hcl`, `environmests/hom/backend.hcl` e `environmests/prod/backend.hcl` com o bucket real.
+Depois ajuste os arquivos em `environments/dev/backend.hcl`, `environments/hom/backend.hcl` e `environments/prod/backend.hcl` com o bucket real.
 
 Referencia:
 
@@ -29,7 +29,6 @@ Crie um arquivo local a partir de `terraform.tfvars.example` e preencha:
 - `dev_account_id`
 - `hom_account_id`
 - `prod_account_id`
-- `cross_account_role_name`, se o nome do role for diferente
 - `alarm_topic_arn`, se quiser notificar alarmes via SNS
 
 Se preferir trabalhar com arquivos separados por ambiente, use:
@@ -43,7 +42,7 @@ Se preferir trabalhar com arquivos separados por ambiente, use:
 Para inicializar um ambiente:
 
 ```bash
-terraform init -backend-config=environmests/dev/backend.hcl
+terraform init -backend-config=environments/dev/backend.hcl
 ```
 
 Troque `dev` por `hom` ou `prod` conforme necessario.
@@ -88,9 +87,9 @@ A stack raiz atual cria:
 
 ## Observacoes
 
-- O projeto ja possui aliases de provider para `dev`, `hom` e `prod`, mas a composicao atual ainda nao instancia modulos separados por conta.
+- O deploy multi-account agora e garantido por credencial separada por `environment` e por uma checagem que valida se a conta AWS ativa corresponde ao `environment` escolhido.
 - A camada curated agora pode ser carregada automaticamente pelo Glue job agendado.
-- Antes de aplicar em producao, ainda vale adicionar testes de deploy, dashboards e tratamento mais completo de observabilidade.
+- O projeto agora inclui dashboard operacional, alarmes adicionais de Lambda/SQS e regra de falha do Glue para reforcar observabilidade.
 - O script do Glue tambem suporta execucao local para testes unitarios sem depender do runtime `awsglue`.
 
 ## 7. Teste de Ponta a Ponta
@@ -211,6 +210,7 @@ O repositorio inclui dois workflows:
 
 - `.github/workflows/terraform-ci.yml`
 - `.github/workflows/terraform-plan.yml`
+- `.github/workflows/environment-smoke.yml`
 
 Configuracao recomendada no GitHub:
 
@@ -220,7 +220,6 @@ Configuracao recomendada no GitHub:
 
 - `AWS_REGION`
 - `PROJECT_NAME`
-- `CROSS_ACCOUNT_ROLE_NAME`
 - `DEV_ACCOUNT_ID`
 - `HOM_ACCOUNT_ID`
 - `PROD_ACCOUNT_ID`
@@ -241,4 +240,5 @@ terraform fmt -check -recursive
 terraform validate
 python -m compileall lambda_src glue_src tests
 python -m unittest discover -s tests -v
+python scripts/smoke_test.py --environment dev --mode static
 ```

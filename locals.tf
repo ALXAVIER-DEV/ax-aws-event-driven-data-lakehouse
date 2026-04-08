@@ -21,4 +21,9 @@ locals {
   tags = merge(var.tags, {
     Environment = var.environment
   })
+  target_account_id = {
+    dev  = var.dev_account_id
+    hom  = var.hom_account_id
+    prod = var.prod_account_id
+  }[var.environment]
 }

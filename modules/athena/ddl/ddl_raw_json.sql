@@ -1,2 +1,4 @@
--- athena/ddl_raw_json.sql
-CREATE DATABASE IF NOT EXISTS onboarding;
+-- Template variables:
+--   ${database_name}
+
+CREATE DATABASE IF NOT EXISTS ${database_name};

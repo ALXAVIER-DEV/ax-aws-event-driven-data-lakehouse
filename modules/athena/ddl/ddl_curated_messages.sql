@@ -1,4 +1,10 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS onboarding.curated_messages_parquet (
+-- Template variables:
+--   ${database_name}
+--   ${curated_table_name}
+--   ${bucket_name}
+--   ${curated_prefix}
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ${database_name}.${curated_table_name} (
   event_id string,
   ingestion_ts timestamp,
   id string,
@@ -7,4 +13,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS onboarding.curated_messages_parquet (
 )
 PARTITIONED BY (date string)
 STORED AS PARQUET
-LOCATION 's3://BUCKET_NAME/curated/messages/';
+LOCATION 's3://${bucket_name}/${curated_prefix}/';

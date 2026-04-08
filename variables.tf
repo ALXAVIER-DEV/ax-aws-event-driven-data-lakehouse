@@ -18,11 +18,6 @@ variable "environment" {
   }
 }
 
-variable "cross_account_role_name" {
-  type    = string
-  default = "terraform-deployment-role"
-}
-
 variable "dev_account_id" {
   type = string
 }
@@ -58,4 +53,24 @@ variable "enable_curated_schedule" {
 variable "curated_schedule_expression" {
   type    = string
   default = "cron(0/15 * * * ? *)"
+}
+
+variable "enable_glue_metrics" {
+  type    = bool
+  default = true
+}
+
+variable "lambda_log_retention_in_days" {
+  type    = number
+  default = 14
+}
+
+variable "lambda_duration_p95_threshold_ms" {
+  type    = number
+  default = 45000
+}
+
+variable "queue_oldest_message_age_threshold_seconds" {
+  type    = number
+  default = 300
 }
